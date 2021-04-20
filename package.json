@@ -8,7 +8,8 @@
     "@sailshq/lodash": "^3.10.3",
     "sails": "^1.4.2",
     "sails-hook-orm": "^3.0.2",
-    "sails-hook-sockets": "^2.0.0"
+    "sails-hook-sockets": "^2.0.0",
+    "sails-mongo": "^1.2.0"
   },
   "devDependencies": {
     "eslint": "5.16.0"

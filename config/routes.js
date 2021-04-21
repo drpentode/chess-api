@@ -9,6 +9,5 @@
  */
 
 module.exports.routes = {
-
-
+    'PUT /game/:gameId/move': { action: 'game/move' }
 };

@@ -61,13 +61,14 @@ function populateBoard(gameBoard) {
 
 
 module.exports = {
-
     attributes: {
-        board: { type: 'json' }
+        board: { type: 'json' },
+        history: { type: 'json'}
     },
 
     beforeCreate: function (recordToCreate, next) {
         recordToCreate.board = generateGameBoard();
+        recordToCreate.history = []; // not implemented
         next();
     }
 };

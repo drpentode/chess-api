@@ -17,6 +17,8 @@ class ChessMoveParser {
         this.updatedGame = Object.assign({}, game);
         this.originSquare = null;
         this.piece = null;
+        this.attack = null;
+        this.attackMove = null;
     }
 
     parse() {
@@ -34,59 +36,106 @@ class ChessMoveParser {
             throw 'Only pawns are implemented. Other chess pieces will be supported later.';
         }
 
-        if (this.gameBoard[this.move].state.occupied) {
-            throw 'Destination square is occupied by another piece';
+        if (this.move.search(/x/gi) == -1) {
+            if (this.gameBoard[this.move].state.occupied) {
+                throw 'Destination square is occupied by another piece';
+            }
+
+            this.attack = false;
+        } else {
+            this.attack = true;
         }
 
         // we have columns and a pawn
-        if (this.#columns.includes(this.move.charAt(0)) && this.#rows.includes(parseInt(this.move.charAt(1)))) {
-            return this.validatePawn(false)
+        if (this.#columns.includes(this.move.charAt(0)) && 
+            (this.#rows.includes(parseInt(this.move.charAt(1))) 
+                || this.#rows.includes(parseInt(this.move.charAt(3)))) // checks both attacks and non-attacks
+        ) { 
+            return this.validatePawn();
         } else {
             throw 'Move is out of bounds';
         }
     }
 
-    validatePawn(capture) {
+    validatePawn() {
         this.piece = 'P'; // needed for saving the move later on
-        let newColumn = this.move.charAt(0);
-        let newRow = parseInt(this.move.charAt(1));
-
-        let twoSquares;
-        let twoSquareCheck;
         let squareCheck;
 
-        if (this.color == 'white') {
-            twoSquares = this.#whitePawnTwoMoveSquares;
-            twoSquareCheck = newColumn + (newRow - 2).toString();
-            squareCheck = newColumn + (newRow - 1).toString();
-        } else if (this.color == 'black') {
-            twoSquares = this.#blackPawnTwoMoveSquares;
-            twoSquareCheck = newColumn + (newRow + 2).toString();
-            squareCheck = newColumn + (newRow + 1).toString();
-        }
+        if (this.attack) {
+            let previousRow;
 
-        if (twoSquares.includes(this.move)) {
-            if (this.gameBoard[twoSquareCheck].state.occupied && this.gameBoard[twoSquareCheck].state.piece == 'P') {
-                this.originSquare = twoSquareCheck;
-                return true;
+            let newColumn = this.move.charAt(2);
+            let newRow = this.move.charAt(3);
+            
+            this.attackMove = newColumn + newRow;
+
+            if (this.color == 'white') {
+                previousRow = (parseInt(newRow) - 1).toString();
+            } else if (this.color == 'black') {
+                previousRow = (parseInt(newRow) + 1).toString();
+            }
+            
+            squareCheck = this.move.charAt(0) + previousRow;
+
+            if (this.gameBoard[squareCheck].state.occupied && this.gameBoard[squareCheck].state.piece == 'P') {
+                this.originSquare = squareCheck;
+
+                if (this.gameBoard[this.attackMove].state.occupied && this.gameBoard[this.attackMove].state.color != this.color) {
+                    return true;
+                } else {
+                    throw 'Invalid move'
+                }
             } else {
                 throw 'Invalid move'
             }
         } else {
-            if (this.gameBoard[squareCheck].state.occupied && this.gameBoard[squareCheck].state.piece == 'P') {
-                this.originSquare = squareCheck;
-                return true;
-            } else {
-                throw 'Invalid move'
+            let newColumn = this.move.charAt(0);
+            let newRow = parseInt(this.move.charAt(1));
+
+            let twoSquares;
+            let twoSquareCheck;
+
+            if (this.color == 'white') {
+                twoSquares = this.#whitePawnTwoMoveSquares;
+                twoSquareCheck = newColumn + (newRow - 2).toString();
+                squareCheck = newColumn + (newRow - 1).toString();
+            } else if (this.color == 'black') {
+                twoSquares = this.#blackPawnTwoMoveSquares;
+                twoSquareCheck = newColumn + (newRow + 2).toString();
+                squareCheck = newColumn + (newRow + 1).toString();
             }
 
+            if (twoSquares.includes(this.move)) {
+                if (this.gameBoard[twoSquareCheck].state.occupied && this.gameBoard[twoSquareCheck].state.piece == 'P') {
+                    this.originSquare = twoSquareCheck;
+                    return true;
+                } else {
+                    throw 'Invalid move'
+                }
+            } else {
+                if (this.gameBoard[squareCheck].state.occupied && this.gameBoard[squareCheck].state.piece == 'P') {
+                    this.originSquare = squareCheck;
+                    return true;
+                } else {
+                    throw 'Invalid move'
+                }
+
+            }
         }
 
     }
 
     movePiece() {
+        let validatedMove;
+
+        if (this.attack) {
+            validatedMove = this.attackMove;
+        } else {
+            validatedMove = this.move;
+        }
+
         this.updatedGame.board[this.originSquare] = { state: { occupied: false, piece: null, color: null } };
-        this.updatedGame.board[this.move] = { state: { occupied: true, piece: this.piece, color: this.color } };
+        this.updatedGame.board[validatedMove] = { state: { occupied: true, piece: this.piece, color: this.color } };
 
         if (this.color == 'white') {
             this.updatedGame.currentPlayer = 'black'

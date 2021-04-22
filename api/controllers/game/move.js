@@ -40,7 +40,7 @@ module.exports = {
             id: inputs.gameId
         }).set({
             board: parsedGame.board,
-            currentPlayer: 'white', //parsedGame.currentPlayer,
+            currentPlayer: parsedGame.currentPlayer,
             history: parsedGame.history
         });
 

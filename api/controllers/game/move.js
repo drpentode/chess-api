@@ -40,7 +40,7 @@ module.exports = {
             id: inputs.gameId
         }).set({
             board: parsedGame.board,
-            currentPlayer: parsedGame.currentPlayer,
+            currentPlayer: 'white', //parsedGame.currentPlayer,
             history: parsedGame.history
         });
 
@@ -49,8 +49,6 @@ module.exports = {
         } else {
             sails.log('Game could not be updated');
         }
-
-        // All done.
 
     }
 

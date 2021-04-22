@@ -13,7 +13,7 @@ class ChessMoveParser {
         this.gameBoard = game.board;
         this.color = game.currentPlayer;
         this.move = move;
-        
+
         this.updatedGame = Object.assign({}, game);
         this.originSquare = null;
         this.piece = null;
@@ -34,53 +34,54 @@ class ChessMoveParser {
             throw 'Only pawns are implemented. Other chess pieces will be supported later.';
         }
 
+        if (this.gameBoard[this.move].state.occupied) {
+            throw 'Destination square is occupied by another piece';
+        }
+
         // we have columns and a pawn
         if (this.#columns.includes(this.move.charAt(0)) && this.#rows.includes(parseInt(this.move.charAt(1)))) {
-            this.piece = 'P'; // needed for saving the move later on
-            let newColumn = this.move.charAt(0);
-            let newRow = parseInt(this.move.charAt(1));
-
-            if (this.gameBoard[this.move].state.occupied) {
-                throw 'Destination square is occupied by another piece';
-            } else {
-                //confirm originating square
-                // is it two rows back?
-                if (this.#whitePawnTwoMoveSquares.includes(this.move) || this.#blackPawnTwoMoveSquares.includes(this.move)) {
-                    let whiteSquareCheck = newColumn + (newRow - 2).toString();
-                    let blackSquareCheck = newColumn + (newRow + 2).toString();
-
-                    if (this.color == 'white' && this.gameBoard[whiteSquareCheck].state.occupied && this.gameBoard[whiteSquareCheck].state.piece == 'P') {
-                        this.originSquare = whiteSquareCheck;
-                        return true;
-                    } else if (this.color == 'black' && this.gameBoard[blackSquareCheck].state.occupied && this.gameBoard[blackSquareCheck].state.piece == 'P') {
-                        this.originSquare = blackSquareCheck;
-                        return true;
-                    } else {
-                        throw 'The move is invalid because there is no Pawn on the originating square';
-                    }
-                // is it one row back?
-                } else {
-                    let whiteSquareCheck = newColumn + (newRow - 1).toString();
-                    let blackSquareCheck = newColumn + (newRow + 1).toString();
-
-                    if (this.color == 'white' && this.gameBoard[whiteSquareCheck].state.occupied && this.gameBoard[whiteSquareCheck].state.piece == 'P') {
-                        this.originSquare = whiteSquareCheck;
-                        return true;
-                    } else if (this.color == 'black' && this.gameBoard[blackSquareCheck].state.occupied && this.gameBoard[blackSquareCheck].state.piece == 'P') {
-                        this.originSquare = blackSquareCheck;
-                        return true;
-                    } else {
-                        throw 'The move is invalid because there is no Pawn on the originating square'
-                    }
-                }
-            }
+            return this.validatePawn(false)
         } else {
             throw 'Move is out of bounds';
         }
     }
 
-    validatePawn() {
-        return false;
+    validatePawn(capture) {
+        this.piece = 'P'; // needed for saving the move later on
+        let newColumn = this.move.charAt(0);
+        let newRow = parseInt(this.move.charAt(1));
+
+        let twoSquares;
+        let twoSquareCheck;
+        let squareCheck;
+
+        if (this.color == 'white') {
+            twoSquares = this.#whitePawnTwoMoveSquares;
+            twoSquareCheck = newColumn + (newRow - 2).toString();
+            squareCheck = newColumn + (newRow - 1).toString();
+        } else if (this.color == 'black') {
+            twoSquares = this.#blackPawnTwoMoveSquares;
+            twoSquareCheck = newColumn + (newRow + 2).toString();
+            squareCheck = newColumn + (newRow + 1).toString();
+        }
+
+        if (twoSquares.includes(this.move)) {
+            if (this.gameBoard[twoSquareCheck].state.occupied && this.gameBoard[twoSquareCheck].state.piece == 'P') {
+                this.originSquare = twoSquareCheck;
+                return true;
+            } else {
+                throw 'Invalid move'
+            }
+        } else {
+            if (this.gameBoard[squareCheck].state.occupied && this.gameBoard[squareCheck].state.piece == 'P') {
+                this.originSquare = squareCheck;
+                return true;
+            } else {
+                throw 'Invalid move'
+            }
+
+        }
+
     }
 
     movePiece() {

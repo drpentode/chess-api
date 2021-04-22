@@ -30,16 +30,27 @@ module.exports = {
     },
 
     fn: async function (inputs) {
-        let updatedGameBoard = {};
-
         let game = await Game.findOne({ id: inputs.gameId });
         if (!game) { throw 'notFound' };
 
-        let parser = new Parser(inputs.moveStatement, game.board);
-        let parsedMove = parser.parse();
+        let parser = new Parser(inputs.moveStatement, game);
+        let parsedGame = parser.parse();
+
+        let updatedGame = await Game.updateOne({
+            id: inputs.gameId
+        }).set({
+            board: parsedGame.board,
+            currentPlayer: parsedGame.currentPlayer,
+            history: parsedGame.history
+        });
+
+        if (updatedGame) {
+            return updatedGame;
+        } else {
+            sails.log('Game could not be updated');
+        }
 
         // All done.
-        return updatedGameBoard;
 
     }
 

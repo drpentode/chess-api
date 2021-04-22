@@ -9,19 +9,19 @@ class ChessMoveParser {
     #blackPawnStartSquares = ['a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7'];
     #blackPawnTwoMoveSquares = ['a5', 'b5', 'c5', 'd5', 'e5', 'f5', 'g5', 'h5'];
 
-    constructor(move, gameBoard) {
-        this.gameBoard = gameBoard;
+    constructor(move, game) {
+        this.gameBoard = game.board;
+        this.color = game.currentPlayer;
         this.move = move;
         
-        this.updatedGameBoard = {};
+        this.updatedGame = Object.assign({}, game);
         this.originSquare = null;
         this.piece = null;
-        this.color = null;
     }
 
     parse() {
         if (this.validate()) {
-            this.movePiece();
+            return this.movePiece();
         };
     }
 
@@ -49,12 +49,10 @@ class ChessMoveParser {
                     let whiteSquareCheck = newColumn + (newRow - 2).toString();
                     let blackSquareCheck = newColumn + (newRow + 2).toString();
 
-                    if (this.gameBoard[whiteSquareCheck].state.occupied && this.gameBoard[whiteSquareCheck].state.piece == 'P') {
-                        this.color = 'white';
+                    if (this.color == 'white' && this.gameBoard[whiteSquareCheck].state.occupied && this.gameBoard[whiteSquareCheck].state.piece == 'P') {
                         this.originSquare = whiteSquareCheck;
                         return true;
-                    } else if (this.gameBoard[blackSquareCheck].state.occupied && this.gameBoard[blackSquareCheck].state.piece == 'P') {
-                        this.color = 'black';
+                    } else if (this.color == 'black' && this.gameBoard[blackSquareCheck].state.occupied && this.gameBoard[blackSquareCheck].state.piece == 'P') {
                         this.originSquare = blackSquareCheck;
                         return true;
                     } else {
@@ -65,12 +63,10 @@ class ChessMoveParser {
                     let whiteSquareCheck = newColumn + (newRow - 1).toString();
                     let blackSquareCheck = newColumn + (newRow + 1).toString();
 
-                    if (this.gameBoard[whiteSquareCheck].state.occupied && this.gameBoard[whiteSquareCheck].state.piece == 'P') {
-                        this.color = 'white';
+                    if (this.color == 'white' && this.gameBoard[whiteSquareCheck].state.occupied && this.gameBoard[whiteSquareCheck].state.piece == 'P') {
                         this.originSquare = whiteSquareCheck;
                         return true;
-                    } else if (this.gameBoard[blackSquareCheck].state.occupied && this.gameBoard[blackSquareCheck].state.piece == 'P') {
-                        this.color = 'black';
+                    } else if (this.color == 'black' && this.gameBoard[blackSquareCheck].state.occupied && this.gameBoard[blackSquareCheck].state.piece == 'P') {
                         this.originSquare = blackSquareCheck;
                         return true;
                     } else {
@@ -88,11 +84,16 @@ class ChessMoveParser {
     }
 
     movePiece() {
-        this.updatedGameBoard = Object.assign({}, this.gameBoard);
-        this.updatedGameBoard[this.originSquare] = { state: { occupied: false, piece: null, color: null } };
-        this.updatedGameBoard[this.move] = { state: { occupied: true, piece: this.piece, color: this.color } };
+        this.updatedGame.board[this.originSquare] = { state: { occupied: false, piece: null, color: null } };
+        this.updatedGame.board[this.move] = { state: { occupied: true, piece: this.piece, color: this.color } };
 
-        return this.updatedGameBoard;
+        if (this.color == 'white') {
+            this.updatedGame.currentPlayer = 'black'
+        } else {
+            this.updatedGame.currentPlayer = 'white'
+        }
+
+        return this.updatedGame;
     }
 
 }

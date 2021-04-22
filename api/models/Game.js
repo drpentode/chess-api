@@ -63,12 +63,14 @@ function populateBoard(gameBoard) {
 module.exports = {
     attributes: {
         board: { type: 'json' },
-        history: { type: 'json'}
+        history: { type: 'json'},
+        currentPlayer: { type: 'string' }
     },
 
     beforeCreate: function (recordToCreate, next) {
         recordToCreate.board = generateGameBoard();
         recordToCreate.history = []; // not implemented
+        recordToCreate.currentPlayer = 'white'; // white is always player 1
         next();
     }
 };

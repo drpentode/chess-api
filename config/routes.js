@@ -9,5 +9,8 @@
  */
 
 module.exports.routes = {
-    'PUT /game/:gameId/move': { action: 'game/move' }
+    'GET /game/:gameId': { action: 'game/status' },
+    'PUT /game/:gameId': { action: 'game/move' },
+    'GET /game/:gameId/history': { action: 'game/history' },
+    'GET /game/:gameId/possibleMoves/:square' : { action: 'game/valid-moves' }
 };

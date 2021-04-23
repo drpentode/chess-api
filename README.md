@@ -5,7 +5,7 @@ This API simulates a chess game using RESTful API endpoints.
 ## Endpoints
 
 * `POST /game/new` - Creates new game - returns game ID and a pre-populated board
-* `GET /game/:game_id/status` - current state of the gameboard
+* `GET /game/:game_id` - current state of the gameboard
 * `PUT /game/:game_id/move/:move_dsl` - uses Chess Notation to make a move
 * `GET /game/:game_id/history` - history of the game
 

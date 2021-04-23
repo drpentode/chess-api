@@ -1,28 +1,47 @@
+const Parser = require('../../lib/ChessMoveParser');
+
 module.exports = {
 
 
-  friendlyName: 'Valid moves',
+    friendlyName: 'Valid moves',
 
 
-  description: '',
+    description: 'Shows possible valid moves for a piece, including potential captures',
 
 
-  inputs: {
+    inputs: {
+        gameId: {
+            description: 'The ID of the game',
+            type: 'string',
+            required: true
+        },
+        square: {
+            description: 'Occupied square to investigate',
+            type: 'string',
+            required: true
+        }
+    },
 
-  },
+
+    exits: {
+        notFound: {
+            description: 'No game found with the specified ID was found in the database',
+            statusCode: 404
+        }
+    },
 
 
-  exits: {
+    fn: async function (inputs) {
+        let game = await Game.findOne({ id: inputs.gameId });
+        if (!game) { throw 'notFound' };
 
-  },
+        let parser = new Parser(inputs.square, game);
+        validMoves = parser.validMoves();
 
+        // All done.
+        return { validMoves: validMoves };
 
-  fn: async function (inputs) {
-
-    // All done.
-    return;
-
-  }
+    }
 
 
 };

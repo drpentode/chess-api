@@ -25,7 +25,7 @@ module.exports = {
     exits: {
         notFound: {
             description: 'No game found with the specified ID was found in the database',
-            responseType: 'notFound'
+            statusCode: 404
         }
     },
 

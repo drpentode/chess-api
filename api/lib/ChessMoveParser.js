@@ -6,13 +6,13 @@ class ChessMoveParser {
     #whitePawnSquares = ['a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2'];
     #whitePawnTwoMoveSquares = ['a4', 'b4', 'c4', 'd4', 'e4', 'f4', 'g4', 'h4'];
 
-    #blackPawnStartSquares = ['a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7'];
+    #blackPawnSquares = ['a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7'];
     #blackPawnTwoMoveSquares = ['a5', 'b5', 'c5', 'd5', 'e5', 'f5', 'g5', 'h5'];
 
-    constructor(move, game) {
+    constructor(moveOrPiece, game) {
         this.gameBoard = game.board;
         this.color = game.currentPlayer;
-        this.move = move;
+        this.move = moveOrPiece;
 
         this.updatedGame = Object.assign({}, game);
         this.originSquare = null;
@@ -25,6 +25,134 @@ class ChessMoveParser {
         if (this.validate()) {
             return this.movePiece();
         };
+    }
+
+    validMoves() {
+        let gameSquare = this.gameBoard[this.move].state;
+
+        if (!gameSquare.occupied) {
+            throw 'Square is not occupied';
+        }
+
+        if (gameSquare.piece != 'P') {
+            throw 'Only pawns are implemented';
+        }
+
+        if (!this.#columns.includes(this.move.charAt(0)) || !this.#rows.includes(parseInt(this.move.charAt(1)))) {
+            throw 'Square is out of bounds';
+        }
+
+        this.piece = gameSquare.piece;
+        this.color = gameSquare.color;
+
+        switch (this.piece) {
+            case 'P':
+                return this.validPawnMoves();
+                break;
+            default:
+                throw 'Only pawns are implemented';
+        }
+    }
+
+    validPawnMoves() {
+        let column =  this.move.charAt(0);
+        let row = parseInt(this.move.charAt(1));
+
+        let pawnSquares;
+        let validMoves = [];
+
+        // home row check
+        if (this.color == 'white') {
+            pawnSquares = this.#whitePawnSquares;
+        } else if (this.color == 'black') {
+            pawnSquares = this.#blackPawnSquares;
+        }
+
+        if (pawnSquares.includes(this.move)) {
+            let move1;
+            let move2;
+
+            if (this.color == 'white') {
+                move1 = column + (row + 1).toString();
+                move2 = column + (row + 2).toString();
+            } else if (this.color == 'black') {
+                move1 = column + (row - 1).toString();
+                move2 = column + (row - 2).toString();
+            }
+
+            if (this.gameBoard[move1].state.occupied == false) {
+                validMoves.push(move1);
+            }
+
+            if (this.gameBoard[move2].state.occupied == false) {
+                validMoves.push(move2);
+            }
+        } else {
+            // pawns anywhere
+            if ((this.color == 'white' && row == 9) || (this.color == 'black' && row == 1)) {
+                throw 'You are at the end of the board. No more moves.'
+            }
+
+            let forwardSquare;
+            let leftDiagSquare;
+            let rightDiagSquare;
+
+            let leftCheck = this.#columns.indexOf(column) - 1;
+            let rightCheck = this.#columns.indexOf(column) + 1;
+
+            if (this.color == 'white') {
+                forwardSquare = column + (row + 1).toString();
+
+                if (this.gameBoard[forwardSquare].state.occupied == false) {
+                    validMoves.push(forwardSquare);
+                }
+
+                if (leftCheck != -1) {
+                    leftDiagSquare = this.#columns[leftCheck] + (row + 1).toString();
+
+                    if (this.gameBoard[leftDiagSquare].state.occupied == true && this.gameBoard[leftDiagSquare].state.color == 'black') {
+                        let formattedLeftDiagSquare = column + 'x' + leftDiagSquare;
+                        validMoves.push(formattedLeftDiagSquare);
+                    }
+                }
+
+                if (rightCheck != -1) {
+                    rightDiagSquare = this.#columns[rightCheck] + (row + 1).toString();
+
+                    if (this.gameBoard[rightDiagSquare].state.occupied == true && this.gameBoard[rightDiagSquare].state.color == 'black') {
+                        let formattedRightDiagSquare = column + 'x' + rightDiagSquare;
+                        validMoves.push(formattedRightDiagSquare);
+                    }
+                }
+
+            } else if (this.color == 'black') {
+                forwardSquare = column + (row - 1).toString();
+
+                if (this.gameBoard[forwardSquare].state.occupied == false) {
+                    validMoves.push(forwardSquare);
+                }
+
+                if (leftCheck != -1) {
+                    leftDiagSquare = pawnSquares[leftCheck] + (row - 1).toString();
+
+                    if (this.gameBoard[leftDiagSquare].state.occupied == true && this.gameBoard[leftDiagSquare].state.color == 'white') {
+                        let formattedRightDiagSquare = column + 'x' + rightDiagSquare;
+                        validMoves.push(formattedLeftDiagSquare);
+                    }
+                }
+
+                if (rightCheck != -1) {
+                    rightDiagSquare = pawnSquares[rightCheck] + (row - 1).toString();
+
+                    if (this.gameBoard[rightDiagSquare].state.occupied == true && this.gameBoard[rightDiagSquare].state.color == 'white') {
+                        let formattedRightDiagSquare = column + 'x' + rightDiagSquare;
+                        validMoves.push(formattedRightDiagSquare);
+                    }
+                }
+            }
+        }
+
+        return validMoves;
     }
 
     validate() {
@@ -66,7 +194,7 @@ class ChessMoveParser {
 
             let newColumn = this.move.charAt(2);
             let newRow = this.move.charAt(3);
-            
+
             this.attackMove = newColumn + newRow;
 
             if (this.color == 'white') {
@@ -74,7 +202,7 @@ class ChessMoveParser {
             } else if (this.color == 'black') {
                 previousRow = (parseInt(newRow) + 1).toString();
             }
-            
+
             squareCheck = this.move.charAt(0) + previousRow;
 
             if (this.gameBoard[squareCheck].state.occupied && this.gameBoard[squareCheck].state.piece == 'P') {

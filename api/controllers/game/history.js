@@ -1,28 +1,34 @@
 module.exports = {
 
 
-  friendlyName: 'History',
+    friendlyName: 'History',
 
 
-  description: 'History game.',
+    description: 'Not Implemented - Returns the move history of a game in algebraic notation',
 
 
-  inputs: {
+    inputs: {
+        gameId: {
+            description: 'The ID of the game',
+            type: 'string',
+            required: true
+        }
 
-  },
+    },
 
 
-  exits: {
+    exits: {
+        notImplemented: {
+            description: 'Feature not implemented',
+            statusCode: 501
+        }
 
-  },
+    },
 
 
-  fn: async function (inputs) {
-
-    // All done.
-    return;
-
-  }
+    fn: async function (inputs) {
+        throw 'notImplemented';
+    }
 
 
 };

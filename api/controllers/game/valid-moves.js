@@ -27,21 +27,31 @@ module.exports = {
         notFound: {
             description: 'No game found with the specified ID was found in the database',
             statusCode: 404
+        },
+        parserError: {
+            description: 'There was an error parsing the move',
+            statusCode: 422
         }
     },
 
 
     fn: async function (inputs) {
+        let validMoves;
+
         let game = await Game.findOne({ id: inputs.gameId });
         if (!game) { throw 'notFound' };
 
         let parser = new Parser(inputs.square, game);
-        validMoves = parser.validMoves();
+
+        try {
+            validMoves = parser.validMoves();
+        } catch {
+            throw 'parserError';
+        }
+
 
         // All done.
         return { validMoves: validMoves };
-
     }
-
 
 };

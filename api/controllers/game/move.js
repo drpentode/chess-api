@@ -26,15 +26,30 @@ module.exports = {
         notFound: {
             description: 'No game found with the specified ID was found in the database',
             statusCode: 404
+        },
+        parserError: {
+            description: 'There was an error parsing the move',
+            statusCode: 422
+        },
+        saveError: {
+            description: 'Game could not be saved to the server',
+            statusCode: 500
         }
     },
 
     fn: async function (inputs) {
+        let parsedGame; 
+
         let game = await Game.findOne({ id: inputs.gameId });
         if (!game) { throw 'notFound' };
 
         let parser = new Parser(inputs.moveStatement, game);
-        let parsedGame = parser.parse();
+
+        try {
+            parsedGame = parser.parse();
+        } catch {
+            throw 'parserError';
+        }
 
         let updatedGame = await Game.updateOne({
             id: inputs.gameId
@@ -47,7 +62,7 @@ module.exports = {
         if (updatedGame) {
             return updatedGame;
         } else {
-            sails.log('Game could not be updated');
+            throw 'saveError';
         }
 
     }

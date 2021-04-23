@@ -47,8 +47,8 @@ module.exports = {
 
         try {
             parsedGame = parser.parse();
-        } catch {
-            throw 'parserError';
+        } catch(e) {
+            throw { parserError: e };
         }
 
         let updatedGame = await Game.updateOne({

@@ -45,8 +45,8 @@ module.exports = {
 
         try {
             validMoves = parser.validMoves();
-        } catch {
-            throw 'parserError';
+        } catch(e) {
+            throw { parserError: e };
         }
 
 
